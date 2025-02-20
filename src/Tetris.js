@@ -215,10 +215,15 @@ const Tetris = () => {
     console.log("Starting new game");
     try {
       setGrid(Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(0)));
+      console.log("Grid set");
       setCurrentPiece(null);
+      console.log("Current piece set to null");
       setGameOver(false);
+      console.log("Game over set to false");
       setScore(0);
+      console.log("Score set to 0");
       setIsPaused(false);
+      console.log("Is paused set to false");
       const audio = audioRef.current;
       audio.currentTime = 0;
       audio.play()
@@ -250,7 +255,10 @@ const Tetris = () => {
   const togglePause = () => {
     console.log("Toggling pause, current state:", isPaused);
     try {
-      setIsPaused(prev => !prev);
+      setIsPaused(prev => {
+        console.log("Setting isPaused to:", !prev);
+        return !prev;
+      });
     } catch (error) {
       console.error("Error toggling pause:", error);
     }
