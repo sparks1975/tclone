@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+
+:root {
+  --black: #1e2126;
+  --white: #fff;
+  --block-red: #AD2E24;
+  --block-yellow: #F3DE8A;
+  --block-blue: #0C6291;
+  --block-green: #0B6E4F;
+  --block-purple: #A545B0;
+}
+
+.tetris {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--black);
+  font-family: 'Nunito Sans', sans-serif; /* Apply font globally */
+}
+
+.logo {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--white);
+  text-align: center;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.game-layout {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.game-container {
+  text-align: center;
+}
+
+.grid {
+  display: inline-block;
+  border: 2px solid var(--black);
+  background-color: var(--black);
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.color-0 {
+  background-color: var(--black);
+}
+
+.color-1 {
+  background-color: var(--block-red); /* Red */
+}
+
+.color-2 {
+  background-color: var(--block-green); /* Green */
+}
+
+.color-3 {
+  background-color: var(--block-blue); /* Blue */
+}
+
+.color-4 {
+  background-color: var(--block-yellow); /* Yellow */
+}
+
+.color-5 {
+  background-color: var(--block-purple); /* Purple */
+}
+
+.score {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: var(--white);
+}
+
+.controls {
+  margin-top: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 0 10px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: var(--black);
+  color: var(--white);
+  border: 2px solid var(--white);
+  border-radius: 60px;
+}
+
+button:hover {
+  background-color: var(--block-blue);
+}
+
+.game-over {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  color: var(--block-red);
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.instructions {
+  margin-left: 20px;
+  background-color: var(--black);
+  padding: 20px;
+  border: 2px solid var(--white);
+  border-radius: 5px;
+  max-width: 250px;
+  color: var(--white);
+}
+
+.instructions h3 {
+  margin-top: 0;
+  font-size: 20px;
+  color: var(--white);
+}
+
+.instructions ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.instructions li {
+  margin: 10px 0;
+  font-size: 16px;
+  color: var(--white);
+}
