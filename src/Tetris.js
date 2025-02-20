@@ -8,9 +8,10 @@ const BASE_INTERVAL = 500;
 const SPEED_INCREMENT = 50;
 
 const Tetris = () => {
-  const [grid, setGrid] = useState(() => 
-    Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(0))
-  );
+  const [grid, setGrid] = useState(() => {
+    console.log("Initializing grid");
+    return Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(0));
+  });
   const [currentPiece, setCurrentPiece] = useState(null);
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
@@ -28,6 +29,7 @@ const Tetris = () => {
   ];
 
   const spawnPiece = useCallback(() => {
+    console.log("Spawning piece");
     const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
     return {
       shape,
@@ -85,37 +87,52 @@ const Tetris = () => {
   }, [GRID_WIDTH, GRID_HEIGHT]);
 
   useEffect(() => {
+    console.log("Audio useEffect running");
     const audio = audioRef.current;
     audio.loop = true;
-    audio.play()
-      .then(() => console.log("Audio started on mount"))
-      .catch(error => {
-        console.error("Initial audio play failed:", error);
-        setAudioBlocked(true);
-      });
+    try {
+      audio.play()
+        .then(() => console.log("Audio started on mount"))
+        .catch(error => {
+          console.error("Initial audio play failed:", error);
+          setAudioBlocked(true);
+        });
+    } catch (error) {
+      console.error("Error in audio init:", error);
+    }
     return () => {
       audio.pause();
     };
   }, []);
 
   useEffect(() => {
+    console.log("Audio control useEffect running");
     const audio = audioRef.current;
-    if (isPaused || gameOver) {
-      audio.pause();
-    } else {
-      audio.play()
-        .then(() => console.log("Audio playing"))
-        .catch(error => console.error("Audio play failed:", error));
+    try {
+      if (isPaused || gameOver) {
+        audio.pause();
+      } else {
+        audio.play()
+          .then(() => console.log("Audio playing"))
+          .catch(error => console.error("Audio play failed:", error));
+      }
+    } catch (error) {
+      console.error("Error in audio control:", error);
     }
   }, [isPaused, gameOver]);
 
   useEffect(() => {
+    console.log("Game loop useEffect running");
     if (!currentPiece && !gameOver) {
-      const newPiece = spawnPiece();
-      if (checkCollision(newPiece, grid)) {
-        setGameOver(true);
-      } else {
-        setCurrentPiece(newPiece);
+      try {
+        const newPiece = spawnPiece();
+        if (checkCollision(newPiece, grid)) {
+          setGameOver(true);
+        } else {
+          setCurrentPiece(newPiece);
+        }
+      } catch (error) {
+        console.error("Error spawning piece:", error);
       }
     }
 
@@ -124,13 +141,18 @@ const Tetris = () => {
       const interval = Math.max(BASE_INTERVAL - (speedLevel * SPEED_INCREMENT), 100);
 
       const timer = setInterval(() => {
-        const newPiece = { ...currentPiece, pos: { ...currentPiece.pos, y: currentPiece.pos.y + 1 } };
-        if (checkCollision(newPiece, grid)) {
-          const newGrid = clearLines(mergePiece(grid, currentPiece));
-          setGrid(newGrid);
-          setCurrentPiece(null);
-        } else {
-          setCurrentPiece(newPiece);
+        try {
+          const newPiece = { ...currentPiece, pos: { ...currentPiece.pos, y: currentPiece.pos.y + 1 } };
+          if (checkCollision(newPiece, grid)) {
+            const newGrid = clearLines(mergePiece(grid, currentPiece));
+            setGrid(newGrid);
+            setCurrentPiece(null);
+          } else {
+            setCurrentPiece(newPiece);
+          }
+        } catch (error) {
+          console.error("Error in game loop:", error);
+          clearInterval(timer);
         }
       }, interval);
 
@@ -141,76 +163,101 @@ const Tetris = () => {
   const handleKeyPress = useCallback((e) => {
     if (!currentPiece || gameOver || isPaused) return;
 
-    let newPiece = { ...currentPiece };
+    try {
+      let newPiece = { ...currentPiece };
 
-    switch (e.key) {
-      case 'ArrowLeft':
-        if (!checkCollision(newPiece, grid, -1, 0)) {
-          newPiece.pos.x--;
-        }
-        break;
-      case 'ArrowRight':
-        if (!checkCollision(newPiece, grid, 1, 0)) {
-          newPiece.pos.x++;
-        }
-        break;
-      case 'ArrowDown':
-        if (!checkCollision(newPiece, grid, 0, 1)) {
-          newPiece.pos.y++;
-        }
-        break;
-      case 'ArrowUp':
-        const rotated = currentPiece.shape[0].map((_, i) =>
-          currentPiece.shape.map(row => row[row.length - 1 - i])
-        );
-        const tempPiece = { ...newPiece, shape: rotated };
-        const maxX = Math.max(...rotated.map(row => row.length)) + tempPiece.pos.x - 1;
-        if (maxX >= GRID_WIDTH) tempPiece.pos.x -= (maxX - GRID_WIDTH + 1);
-        if (tempPiece.pos.x < 0) tempPiece.pos.x = 0;
+      switch (e.key) {
+        case 'ArrowLeft':
+          if (!checkCollision(newPiece, grid, -1, 0)) {
+            newPiece.pos.x--;
+          }
+          break;
+        case 'ArrowRight':
+          if (!checkCollision(newPiece, grid, 1, 0)) {
+            newPiece.pos.x++;
+          }
+          break;
+        case 'ArrowDown':
+          if (!checkCollision(newPiece, grid, 0, 1)) {
+            newPiece.pos.y++;
+          }
+          break;
+        case 'ArrowUp':
+          const rotated = currentPiece.shape[0].map((_, i) =>
+            currentPiece.shape.map(row => row[row.length - 1 - i])
+          );
+          const tempPiece = { ...newPiece, shape: rotated };
+          const maxX = Math.max(...rotated.map(row => row.length)) + tempPiece.pos.x - 1;
+          if (maxX >= GRID_WIDTH) tempPiece.pos.x -= (maxX - GRID_WIDTH + 1);
+          if (tempPiece.pos.x < 0) tempPiece.pos.x = 0;
 
-        if (!checkCollision(tempPiece, grid)) {
-          newPiece = tempPiece;
-        }
-        break;
-      default:
-        return;
+          if (!checkCollision(tempPiece, grid)) {
+            newPiece = tempPiece;
+          }
+          break;
+        default:
+          return;
+      }
+
+      setCurrentPiece(newPiece);
+    } catch (error) {
+      console.error("Error handling key press:", error);
     }
-
-    setCurrentPiece(newPiece);
   }, [currentPiece, gameOver, isPaused, grid, checkCollision, GRID_WIDTH]);
 
   useEffect(() => {
+    console.log("Keypress useEffect running");
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [handleKeyPress]);
 
   const startNewGame = () => {
-    setGrid(Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(0)));
-    setCurrentPiece(null);
-    setGameOver(false);
-    setScore(0);
-    setIsPaused(false);
-    const audio = audioRef.current;
-    audio.currentTime = 0;
-    audio.play()
-      .then(() => {
-        console.log("Audio started with new game");
-        setAudioBlocked(false);
-      })
-      .catch(error => console.error("Audio play failed on new game:", error));
+    console.log("Starting new game");
+    try {
+      setGrid(Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(0)));
+      setCurrentPiece(null);
+      setGameOver(false);
+      setScore(0);
+      setIsPaused(false);
+      const audio = audioRef.current;
+      audio.currentTime = 0;
+      audio.play()
+        .then(() => {
+          console.log("Audio started with new game");
+          setAudioBlocked(false);
+        })
+        .catch(error => console.error("Audio play failed on new game:", error));
+    } catch (error) {
+      console.error("Error starting new game:", error);
+    }
   };
 
   const startAudio = () => {
-    const audio = audioRef.current;
-    audio.play()
-      .then(() => {
-        console.log("Audio started manually");
-        setAudioBlocked(false);
-      })
-      .catch(error => console.error("Manual audio play failed:", error));
+    console.log("Starting audio manually");
+    try {
+      const audio = audioRef.current;
+      audio.play()
+        .then(() => {
+          console.log("Audio started manually");
+          setAudioBlocked(false);
+        })
+        .catch(error => console.error("Manual audio play failed:", error));
+    } catch (error) {
+      console.error("Error starting audio:", error);
+    }
+  };
+
+  const togglePause = () => {
+    console.log("Toggling pause, current state:", isPaused);
+    try {
+      setIsPaused(prev => !prev);
+    } catch (error) {
+      console.error("Error toggling pause:", error);
+    }
   };
 
   const renderGrid = () => {
+    console.log("Rendering grid");
     let displayGrid = grid.map(row => [...row]);
     if (currentPiece && !gameOver) {
       currentPiece.shape.forEach((row, y) => {
@@ -219,7 +266,7 @@ const Tetris = () => {
             const newY = y + currentPiece.pos.y;
             const newX = x + currentPiece.pos.x;
             if (newX >= 0 && newX < GRID_WIDTH && newY >= 0 && newY < GRID_HEIGHT) {
-              displayGrid[newY][newX] = currentPiece.color; // Fixed: piece -> currentPiece
+              displayGrid[newY][newX] = currentPiece.color;
             }
           }
         });
@@ -234,6 +281,7 @@ const Tetris = () => {
     ));
   };
 
+  console.log("Tetris component rendering");
   return (
     <div className="tetris">
       <div className="logo">Tetris Clone</div>
@@ -242,7 +290,7 @@ const Tetris = () => {
           <div className="score">Score: {score}</div>
           <div className="grid">{renderGrid()}</div>
           <div className="controls">
-            <button onClick={() => setIsPaused(!isPaused)}>
+            <button onClick={togglePause}>
               {isPaused ? 'Resume' : 'Pause'}
             </button>
             <button onClick={startNewGame}>New Game</button>
